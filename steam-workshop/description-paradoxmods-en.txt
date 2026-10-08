@@ -1,0 +1,43 @@
+Sharp Terrain on Low Shader Quality
+
+With Shader Quality set to Low, the whole Victoria 3 map turns into a blurry, flat watercolour — no matter how high the texture settings are. This mod restores full-resolution ground textures and gives the map its relief back, while keeping Low.
+
+The Victoria 3 counterpart of https://steamcommunity.com/sharedfiles/filedetails/?id=3800159542 for Crusader Kings III: same engine, same cause.
+
+THE CAUSE
+
+On Low the map is drawn by Effect PdxTerrainLowSpec in gfx/FX/pdxterrain.shader, and that effect does its detail texture work in the vertex shader: CalculateDetailsLowSpec() runs once per vertex and the result is interpolated across each terrain triangle. The effective resolution of the ground is the density of the terrain mesh, not the resolution of the textures.
+
+On top of that, the Low pixel shader does no lighting at all. The terrain normal is computed and then never used, so hills, ridges and mountain ranges are only visible through their textures.
+
+THE FIX
+
+One new pixel shader for the two Low terrain effects:
+
+- detail textures are sampled per pixel, with proper mip selection, the same way Medium and High do it; colormap and flatmap per pixel too
+- relief shading: the terrain normal plus the detail normal maps, against the sun direction, scaled so that flat ground keeps exactly the vanilla Low brightness — slopes facing the sun get lighter, slopes facing away darker
+- the paper map's folds, grid lines and equator fade in while zooming out to the flat map, as on Medium/High, instead of popping in at the end
+- the effects use the plain vertex shader, so the per-vertex detail work disappears entirely
+
+Everything that makes Medium and High expensive stays off: no shadow map, no cubemap lighting, no specular, no harvest condition, pollution or devastation materials. Expect the cost to land between vanilla Low and Medium — much closer to Low.
+
+NOTES
+
+- Keep Shader Quality on Low. On Medium or High the game uses another effect and this mod does nothing
+- Only the terrain is touched — water, rivers, trees, buildings and units keep their vanilla Low versions
+- Graphics only: no gameplay, script or history files are changed, and it is not multiplayer synchronized
+- Safe to add or remove at any time — it does not touch save games
+- The first map load after enabling is slower: the modified shader is compiled and cached from scratch
+- Relief strength and the three features are switches at the top of the shader; the GitHub readme lists them
+- Built for Victoria 3 1.13.x. Shader overrides replace the vanilla file wholesale, so a patch that reworks pdxterrain.shader will need an update here
+
+COMPATIBILITY
+
+Replaces gfx/FX/pdxterrain.shader in full. It conflicts only with mods that edit that same file — mostly map graphics overhauls. If you use one, place this mod below it in the load order to keep the fix, or above it to keep the other mod's terrain.
+
+SOURCE
+
+The full source is on GitHub, including the exact change against the vanilla shader, a compile check and an install script for Linux / Proton users:
+https://github.com/mekedron/vic3-lowspec-sharp-terrain
+
+Issues and pull requests are welcome.

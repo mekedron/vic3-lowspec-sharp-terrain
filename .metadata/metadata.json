@@ -1,0 +1,13 @@
+{
+  "name" : "Sharp Terrain on Low Shader Quality",
+  "id" : "mekedron.sharp_terrain_low_shaders",
+  "version" : "1.0.0",
+  "supported_game_version" : "1.13.*",
+  "short_description" : "With Shader Quality on Low, Victoria 3 samples the ground textures once per vertex and leaves the map unlit. This mod samples them per pixel and adds cheap relief shading.",
+  "tags" : [ "Graphics", "Fixes", "Utilities" ],
+  "relationships" : [],
+  "picture" : "thumbnail.png",
+  "game_custom_data" : {
+    "multiplayer_synchronized" : false
+  }
+}
